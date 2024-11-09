@@ -12,17 +12,6 @@ RETENTION_WEEKS=16
 RETENTION_MONTHS=18
 RETENTION_YEARS=3
 
-# backup paths (array)
-BACKUP_PATHS=(
-    /mnt/backup-server/immich/backups/database/immich-db.sql
-    /mnt/backup-server/immich/library
-)
-
-EXCLUDE_PATHS=(
-    /mnt/backup-server/immich/library/thumbs
-    /mnt/backup-server/immich/library/encoded-video
-)
-
 # generate exclude options
 EXCLUDE_OPTIONS=""
 for EXCLUDE_PATH in "${EXCLUDE_PATHS[@]}" 
