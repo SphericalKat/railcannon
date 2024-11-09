@@ -1,0 +1,29 @@
+name: Run ansible playbook
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Add ssh private key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan -H 95.216.100.124 >> ~/.ssh/known_hosts
+    
+    - name: Install agebox and decrypt secrets
+      run: |
+        curl -sSL https://github.com/slok/agebox/releases/download/v0.7.1/agebox-linux-amd64 -o agebox
+        chmod +x agebox
+        ./agebox decrypt --all
+
+    - name: Run playbook
+      run: |
+        ansible-playbook -i inventory.ini playbook.yaml
