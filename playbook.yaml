@@ -2,9 +2,38 @@
   hosts: myhosts
   remote_user: root
   tasks:
-   - name: Ping my hosts
-     ansible.builtin.ping:
+  - name: Install packages
+    ansible.builtin.package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - restic
+      - systemd
+  
+  - name: Create /etc/backup directory
+    ansible.builtin.file:
+      path: /etc/backup
+      state: directory
+      mode: '0755'
 
-   - name: Print message
-     ansible.builtin.debug:
-       msg: Hello world
+  - name: Copy restic files
+    ansible.builtin.copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: "{{ item.mode | default('0644') }}"
+    with_items: 
+      - { src: 'secrets/restic_env', dest: '/etc/backup/restic_env', mode: '0400' }
+      - { src: 'scripts/restic_backup.sh', dest: '/etc/backup/restic_backup.sh', mode: '0700' }
+      - { src: 'systemd/services/backup.service', dest: '/etc/systemd/system/backup.service'}
+      - { src: 'systemd/timers/backup.timer', dest: '/etc/systemd/system/backup.timer'}
+  
+  - name: Enable and start backup timer
+    ansible.builtin.systemd:
+      name: backup.timer
+      state: started
+      enabled: yes
+
+  - name: Enable and start restic service
+    ansible.builtin.systemd:
+      name: backup.service
+      enabled: yes

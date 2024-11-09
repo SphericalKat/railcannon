@@ -1,2 +1,3 @@
-file_ids: []
+file_ids:
+- secrets/restic_env
 version: "1"
