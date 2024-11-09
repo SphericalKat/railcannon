@@ -37,3 +37,4 @@
     ansible.builtin.systemd:
       name: backup.service
       enabled: yes
+      state: stopped
