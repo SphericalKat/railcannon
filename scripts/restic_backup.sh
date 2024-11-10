@@ -25,16 +25,28 @@ source /etc/backup/restic_env
 restic unlock &
 wait $!
 
+# back up the immich database
+docker exec -t database-ukgww8w pg_dumpall --clean --if-exists --username postgres > /mnt/backup-server/immich/backups/database/immich-db.sql
 
 #Do the backup for each path
-restic backup --verbose --tag $BACKUP_TAG /mnt/backup-server/immich/backups/database/immich-db.sql
-restic backup --verbose --tag $BACKUP_TAG /mnt/backup-server/immich/library --exclude /mnt/backup-server/immich/library/thumbs --exclude /mnt/backup-server/immich/library/encoded-video
+restic backup --verbose --tag immich-db /mnt/backup-server/immich/backups/database/immich-db.sql
+restic backup --verbose --tag immich-library /mnt/backup-server/immich/library --exclude /mnt/backup-server/immich/library/thumbs --exclude /mnt/backup-server/immich/library/encoded-video
 
 # Remove old Backups
 
 restic forget \
        --verbose \
-       --tag $BACKUP_TAG \
+       --tag immich-db \
+       --prune \
+       --keep-daily $RETENTION_DAYS \
+       --keep-weekly $RETENTION_WEEKS \
+       --keep-monthly $RETENTION_MONTHS \
+       --keep-yearly $RETENTION_YEARS &
+wait $!
+
+restic forget \
+       --verbose \
+       --tag immich-library \
        --prune \
        --keep-daily $RETENTION_DAYS \
        --keep-weekly $RETENTION_WEEKS \
