@@ -32,21 +32,18 @@ docker exec -t database-ukgww8w pg_dumpall --clean --if-exists --username postgr
 restic backup --verbose --tag immich-db /mnt/backup-server/immich/backups/database/immich-db.sql
 restic backup --verbose --tag immich-library /mnt/backup-server/immich/library --exclude /mnt/backup-server/immich/library/thumbs --exclude /mnt/backup-server/immich/library/encoded-video
 
+# backup coolify & docker volumes
+restic backup \
+    --exclude /data/coolify/services/y8sw4ws \
+    --verbose \
+    --tag coolify \
+    /data/coolify
+restic backup --verbose --tag docker-volumes /var/lib/docker/volumes
+
 # Remove old Backups
 
 restic forget \
        --verbose \
-       --tag immich-db \
-       --prune \
-       --keep-daily $RETENTION_DAYS \
-       --keep-weekly $RETENTION_WEEKS \
-       --keep-monthly $RETENTION_MONTHS \
-       --keep-yearly $RETENTION_YEARS &
-wait $!
-
-restic forget \
-       --verbose \
-       --tag immich-library \
        --prune \
        --keep-daily $RETENTION_DAYS \
        --keep-weekly $RETENTION_WEEKS \
